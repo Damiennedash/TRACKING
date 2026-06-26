@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FanMilk – Vendor Check-in</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0d2d6e 0%, #1a4a9e 100%);
+    color: white;
+    padding: 18px 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .header .logo {
+    background: white;
+    color: #0d2d6e;
+    font-weight: 900;
+    font-size: 18px;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: -1px;
+  }
+  .header-text h1 { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+  .header-text p { font-size: 10px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+  .header-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 10px;
+    color: white;
+    display: flex; align-items: center; gap: 5px;
+    flex-shrink: 0;
+  }
+  .header-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    display: inline-block;
+  }
+
+  .container { max-width: 480px; margin: 0 auto; padding: 0 14px; }
+
+  .date-banner {
+    background: #e8eef7;
+    border-left: 4px solid #0d2d6e;
+    padding: 10px 14px;
+    margin: 14px 0 10px;
+    font-size: 12px;
+    color: #0d2d6e;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-radius: 0 6px 6px 0;
+    display: flex; gap: 20px;
+  }
+  .date-banner span { opacity: 0.65; font-weight: 400; margin-right: 4px; }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: opacity 0.25s;
+  }
+  .card.blocked {
+    opacity: 0.42;
+    pointer-events: none;
+    user-select: none;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1a4a9e;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid #1a4a9e;
+    padding-bottom: 7px;
+    margin-bottom: 14px;
+  }
+
+  .row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .col { flex: 1; }
+
+  .field-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .field-label .required { color: #ef4444; }
+
+  input[type="text"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="time"],
+  select,
+  textarea {
+    width: 100%;
+    background: #f3f6fb;
+    border: 1px solid #dde3ef;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #1a4a9e;
+    box-shadow: 0 0 0 3px rgba(26,74,158,0.12);
+    background: white;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  textarea { resize: none; min-height: 70px; font-size: 13px; }
+
+  /* PRÉSENCE */
+  .presence-group { display: flex; gap: 8px; }
+  .presence-btn {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #dde3ef;
+    border-radius: 8px;
+    background: #f3f6fb;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+  }
+  .presence-btn.active-yes { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
+  .presence-btn.active-no  { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+
+  /* ABSENT NOTICE */
+  .absent-notice {
+    display: none;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 13px;
+    font-size: 12px;
+    color: #991b1b;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .absent-notice.visible { display: block; }
+
+  /* VENTES */
+  .ventes-field { position: relative; }
+  .ventes-field input { padding-right: 55px; }
+  .ventes-unit {
+    position: absolute;
+    right: 12px; top: 50%; transform: translateY(-50%);
+    font-size: 11px; font-weight: 700; color: #9ca3af;
+    pointer-events: none;
+  }
+
+  .sku-row { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; }
+  .sku-label { font-size: 12px; font-weight: 700; color: #374151; min-width: 90px; }
+  .sku-input-wrap { flex: 1; position: relative; }
+  .sku-input-wrap input { padding-right: 36px; text-align: right; font-weight: 700; }
+  .sku-unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: 700; color: #9ca3af; }
+
+  /* OBJECTIF QUESTIONS */
+  .objectif-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .obj-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 2px solid #dde3ef;
+    border-radius: 10px;
+    padding: 11px 13px;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: #f3f6fb;
+  }
+  .obj-item:hover { border-color: #1a4a9e; background: #eff4ff; }
+  .obj-item.checked { border-color: #1a4a9e; background: #eff4ff; }
+  .obj-item.aucun-item.checked { border-color: #16a34a; background: #f0fdf4; }
+  .obj-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    font-size: 11px;
+    font-weight: 800;
+    color: #6b7280;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .obj-item.checked .obj-num { background: #1a4a9e; color: white; }
+  .obj-item.aucun-item.checked .obj-num { background: #16a34a; color: white; }
+  .obj-text { font-size: 13px; color: #374151; font-weight: 500; line-height: 1.3; }
+  .obj-item.checked .obj-text { color: #1a4a9e; font-weight: 600; }
+  .obj-item.aucun-item.checked .obj-text { color: #16a34a; }
+
+  /* COMMENTAIRE DYNAMIQUE */
+  .comment-tag {
+    display: inline-block;
+    background: #eff4ff;
+    border: 1px solid #c7d7f9;
+    color: #1a4a9e;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin: 3px 3px 3px 0;
+  }
+  .comment-tags-wrap {
+    display: flex; flex-wrap: wrap;
+    min-height: 28px;
+    margin-bottom: 8px;
+    gap: 2px;
+  }
+  .comment-hint {
+    font-size: 11px; color: #9ca3af; font-style: italic; margin-bottom: 6px;
+  }
+  .card.hidden { display: none; }
+
+  /* CONSENT */
+  .consent-box {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .consent-box input[type="checkbox"] {
+    width: 18px; height: 18px;
+    flex-shrink: 0; margin-top: 1px;
+    accent-color: #1a4a9e;
+  }
+  .consent-box label { font-size: 12px; color: #6b7280; line-height: 1.5; cursor: pointer; }
+
+  .section-note { font-size: 11px; color: #9ca3af; margin-bottom: 10px; font-style: italic; }
+
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #0d2d6e, #1a4a9e);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    transition: opacity 0.2s, transform 0.1s;
+    text-transform: uppercase;
+  }
+  .submit-btn:active { opacity: 0.88; transform: scale(0.99); }
+
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .success-screen .check {
+    width: 70px; height: 70px;
+    background: #16a34a;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 32px; color: white;
+  }
+  .success-screen h2 { color: #0d2d6e; font-size: 20px; margin-bottom: 8px; }
+  .success-screen p { color: #6b7280; font-size: 14px; line-height: 1.5; }
+  .success-ref {
+    background: #e8eef7;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 16px auto;
+    max-width: 280px;
+    font-size: 13px;
+    color: #0d2d6e;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">FM</div>
+  <div class="header-text">
+    <h1>Check-in Revendeur</h1>
+    <p>Fan Milk · Suivi Terrain Quotidien</p>
+  </div>
+  <div class="header-badge">En ligne</div>
+</div>
+
+<div class="container">
+
+  <div class="date-banner" id="dateBanner">
+    <div><span>Date :</span><strong id="displayDate">—</strong></div>
+    <div><span>Période :</span><strong id="displayPeriode">—</strong></div>
+  </div>
+
+  <form id="checkinForm" onsubmit="handleSubmit(event)">
+
+    <input type="hidden" id="fieldDate" name="Date">
+    <input type="hidden" id="fieldPeriode" name="Periode">
+    <input type="hidden" id="fieldPresence" name="Presence" value="">
+    <input type="hidden" id="fieldCategorie" name="Categorie" value="">
+
+    <!-- BLOC 1 : IDENTIFICATION -->
+    <div class="card">
+      <div class="card-title">Identification</div>
+
+      <div class="row">
+        <div class="col">
+          <label class="field-label">Téléphone <span class="required">*</span></label>
+          <input type="tel" id="telephone" name="Telephone" placeholder="ex: 90000000" required>
+        </div>
+        <div class="col">
+          <label class="field-label">Nom Vendor <span class="required">*</span></label>
+          <input type="text" id="nomVendor" name="NomVendor" placeholder="Prénom Nom" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label class="field-label">Dépôt <span class="required">*</span></label>
+          <select id="depot" name="Depot" required>
+            <option value="">— Choisir —</option>
+            <option>NBUKE RAMCO</option>
+            <option>GERM DOSSEH</option>
+            <option>YEHONAM</option>
+            <option>SAINT MARTIN</option>
+          </select>
+        </div>
+        <div class="col">
+          <label class="field-label">Lieu de vente</label>
+          <input type="text" id="lieuVente" name="LieuDeVente" placeholder="Quartier / Marché">
+        </div>
+      </div>
+
+      <!-- HEURES -->
+      <div class="row" style="margin-bottom:0;">
+        <div class="col">
+          <label class="field-label">Heure début <span class="required">*</span></label>
+          <input type="time" id="heureDebut" name="HeureDebut" required>
+        </div>
+        <div class="col">
+          <label class="field-label">Heure fin</label>
+          <input type="time" id="heureFin" name="HeureFin">
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOC 2 : PRÉSENCE -->
+    <div class="card">
+      <div class="card-title">Présence aujourd'hui</div>
+      <div class="presence-group">
+        <div class="presence-btn" id="btnOui" onclick="setPresence('Oui')">✅ Présent(e)</div>
+        <div class="presence-btn" id="btnNon" onclick="setPresence('Non')">❌ Absent(e)</div>
+      </div>
+      <div class="absent-notice" id="absentNotice">
+        ⚠️ Vous avez indiqué être absent(e). Les champs de ventes sont désactivés.
+        Merci de renseigner votre problème ci-dessous si applicable.
+      </div>
+    </div>
+
+    <!-- BLOC 3 : VENTES (bloqué si absent) -->
+    <div class="card" id="blocVentes">
+      <div class="card-title">Ventes du Jour</div>
+      <p class="section-note">Remplir uniquement si vous avez vendu aujourd'hui.</p>
+
+      <div style="margin-bottom:12px;">
+        <label class="field-label">Vente du <span class="required">*</span></label>
+        <input type="date" id="venteDate" name="VenteDate">
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label class="field-label">Ventes totales (FCFA)</label>
+        <div class="ventes-field">
+          <input type="number" id="ventesFCFA" name="VentesFCFA" placeholder="0" min="0">
+          <span class="ventes-unit">FCFA</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="field-label" style="margin-bottom:10px;">Quantités par SKU</label>
+        <div class="sku-row">
+          <span class="sku-label">FanXtra</span>
+          <div class="sku-input-wrap">
+            <input type="number" id="fanXtra" name="FanXtra" placeholder="0" min="0">
+            <span class="sku-unit">pcs</span>
+          </div>
+        </div>
+        <div class="sku-row">
+          <span class="sku-label">FanChoco</span>
+          <div class="sku-input-wrap">
+            <input type="number" id="fanChoco" name="FanChoco" placeholder="0" min="0">
+            <span class="sku-unit">pcs</span>
+          </div>
+        </div>
+        <div class="sku-row">
+          <span class="sku-label">FanVanille</span>
+          <div class="sku-input-wrap">
+            <input type="number" id="fanVanille" name="FanVanille" placeholder="0" min="0">
+            <span class="sku-unit">pcs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOC 4 : OBJECTIF -->
+    <div class="card">
+      <div class="card-title">Objectifs d'aujourd'hui</div>
+      <p class="section-note">Avez-vous un problème pour atteindre vos objectifs aujourd'hui ? <strong>Vous pouvez sélectionner plusieurs.</strong></p>
+
+      <div class="objectif-list">
+        <div class="obj-item" data-val="Problème produit" onclick="toggleObjectif(this)">
+          <div class="obj-num">1</div>
+          <div class="obj-text">J'ai un problème produit</div>
+        </div>
+        <div class="obj-item" data-val="Problème avec mon gérant" onclick="toggleObjectif(this)">
+          <div class="obj-num">2</div>
+          <div class="obj-text">J'ai un problème avec mon gérant</div>
+        </div>
+        <div class="obj-item" data-val="Problème de paiement" onclick="toggleObjectif(this)">
+          <div class="obj-num">3</div>
+          <div class="obj-text">J'ai un problème de paiement</div>
+        </div>
+        <div class="obj-item" data-val="Besoin de conseils de vente" onclick="toggleObjectif(this)">
+          <div class="obj-num">4</div>
+          <div class="obj-text">J'ai besoin de conseils de vente</div>
+        </div>
+        <div class="obj-item" data-val="Problème d'équipement" onclick="toggleObjectif(this)">
+          <div class="obj-num">5</div>
+          <div class="obj-text">J'ai un problème d'équipement</div>
+        </div>
+        <div class="obj-item" data-val="Je veux parler au support" onclick="toggleObjectif(this)">
+          <div class="obj-num">6</div>
+          <div class="obj-text">Je veux parler au support</div>
+        </div>
+        <div class="obj-item aucun-item" data-val="Aucun problème" onclick="toggleObjectif(this)">
+          <div class="obj-num">7</div>
+          <div class="obj-text">Aucun problème — Tout va bien aujourd'hui ✅</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOC 5 : COMMENTAIRE (masqué si option 7) -->
+    <div class="card" id="blocCommentaire">
+      <div class="card-title">Commentaire</div>
+      <div class="comment-tags-wrap" id="commentTags"></div>
+      <p class="comment-hint" id="commentHint">Précisez votre situation pour chaque problème sélectionné.</p>
+      <textarea id="commentaire" name="Commentaire" placeholder="Décrivez votre situation ici…"></textarea>
+    </div>
+
+    <!-- CONSENTEMENT -->
+    <div class="card">
+      <div class="consent-box">
+        <input type="checkbox" id="consent" required>
+        <label for="consent">
+          Je consens à partager ces informations avec FanMilk Togo dans le cadre du suivi terrain quotidien. Ces données sont utilisées uniquement à des fins de performance commerciale.
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">Soumettre mon Check-in</button>
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="check">✓</div>
+    <h2>Check-in enregistré !</h2>
+    <p>Merci <strong id="successName"></strong>, votre déclaration a bien été enregistrée pour aujourd'hui.</p>
+    <div class="success-ref" id="successRef"></div>
+    <p style="font-size:12px;color:#9ca3af;margin-top:12px;">Vous pouvez fermer cette page.</p>
+  </div>
+
+</div>
+
+<script>
+// ── INIT ──
+function initDateTime() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const date = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+  const h = now.getHours();
+  const periode = h < 12 ? 'Matin' : h < 17 ? 'Après-midi' : 'Soir';
+  const timeVal = `${pad(h)}:${pad(now.getMinutes())}`;
+
+  document.getElementById('displayDate').textContent = date;
+  document.getElementById('displayPeriode').textContent = periode;
+  document.getElementById('fieldDate').value = date;
+  document.getElementById('fieldPeriode').value = periode;
+  document.getElementById('heureDebut').value = timeVal;
+}
+initDateTime();
+
+// ── PRÉSENCE ──
+function setPresence(val) {
+  document.getElementById('fieldPresence').value = val;
+  document.getElementById('btnOui').className = 'presence-btn' + (val==='Oui' ? ' active-yes' : '');
+  document.getElementById('btnNon').className = 'presence-btn' + (val==='Non' ? ' active-no' : '');
+
+  const blocVentes = document.getElementById('blocVentes');
+  const notice = document.getElementById('absentNotice');
+
+  if (val === 'Non') {
+    blocVentes.classList.add('blocked');
+    notice.classList.add('visible');
+    ['venteDate','ventesFCFA','fanXtra','fanChoco','fanVanille'].forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+      el.disabled = true;
+    });
+  } else {
+    blocVentes.classList.remove('blocked');
+    notice.classList.remove('visible');
+    ['venteDate','ventesFCFA','fanXtra','fanChoco','fanVanille'].forEach(id => {
+      document.getElementById(id).disabled = false;
+    });
+  }
+}
+
+// ── OBJECTIF MULTI-SELECT ──
+const selectedProblemes = new Set();
+
+function toggleObjectif(el) {
+  const val = el.dataset.val;
+  const isAucun = val === 'Aucun problème';
+
+  if (isAucun) {
+    // Option 7 : exclusif — désélectionne tout le reste
+    if (el.classList.contains('checked')) {
+      el.classList.remove('checked');
+      selectedProblemes.delete(val);
+    } else {
+      document.querySelectorAll('.obj-item').forEach(i => i.classList.remove('checked'));
+      selectedProblemes.clear();
+      el.classList.add('checked');
+      selectedProblemes.add(val);
+    }
+  } else {
+    // Désélectionner "Aucun problème" si on choisit autre chose
+    const aucunEl = document.querySelector('.aucun-item');
+    if (aucunEl && aucunEl.classList.contains('checked')) {
+      aucunEl.classList.remove('checked');
+      selectedProblemes.delete('Aucun problème');
+    }
+
+    if (el.classList.contains('checked')) {
+      el.classList.remove('checked');
+      selectedProblemes.delete(val);
+    } else {
+      el.classList.add('checked');
+      selectedProblemes.add(val);
+    }
+  }
+
+  document.getElementById('fieldCategorie').value = [...selectedProblemes].join(' | ');
+  updateCommentBlock();
+}
+
+function updateCommentBlock() {
+  const blocComm = document.getElementById('blocCommentaire');
+  const tagsWrap = document.getElementById('commentTags');
+  const hint     = document.getElementById('commentHint');
+  const textarea = document.getElementById('commentaire');
+
+  // Masquer si "Aucun problème" ou rien sélectionné
+  if (selectedProblemes.has('Aucun problème') || selectedProblemes.size === 0) {
+    blocComm.classList.add('hidden');
+    textarea.value = '';
+    tagsWrap.innerHTML = '';
+    return;
+  }
+
+  blocComm.classList.remove('hidden');
+
+  // Afficher les tags des problèmes sélectionnés
+  tagsWrap.innerHTML = '';
+  selectedProblemes.forEach(p => {
+    const tag = document.createElement('span');
+    tag.className = 'comment-tag';
+    tag.textContent = p;
+    tagsWrap.appendChild(tag);
+  });
+
+  // Placeholder dynamique
+  const liste = [...selectedProblemes].join(', ');
+  textarea.placeholder = `Décrivez votre situation concernant : ${liste}…`;
+
+  // Hint pluriel
+  hint.textContent = selectedProblemes.size > 1
+    ? `${selectedProblemes.size} problèmes sélectionnés — précisez ci-dessous.`
+    : 'Précisez votre situation pour ce problème.';
+}
+
+// ── SUBMIT ──
+function handleSubmit(e) {
+  e.preventDefault();
+
+  if (!document.getElementById('fieldPresence').value) {
+    alert('Veuillez indiquer votre présence (Présent ou Absent).');
+    return;
+  }
+  if (selectedProblemes.size === 0) {
+    alert('Veuillez sélectionner au moins une option pour vos objectifs du jour.');
+    return;
+  }
+
+  const presence = document.getElementById('fieldPresence').value;
+
+  const data = {
+    Date:        document.getElementById('fieldDate').value,
+    Periode:     document.getElementById('fieldPeriode').value,
+    HeureDebut:  document.getElementById('heureDebut').value,
+    HeureFin:    document.getElementById('heureFin').value,
+    Telephone:   document.getElementById('telephone').value,
+    NomVendor:   document.getElementById('nomVendor').value,
+    Depot:       document.getElementById('depot').value,
+    Presence:    presence,
+    VenteDate:   presence === 'Non' ? '' : document.getElementById('venteDate').value,
+    VentesFCFA:  presence === 'Non' ? '0' : (document.getElementById('ventesFCFA').value || '0'),
+    FanXtra:     presence === 'Non' ? '0' : (document.getElementById('fanXtra').value || '0'),
+    FanChoco:    presence === 'Non' ? '0' : (document.getElementById('fanChoco').value || '0'),
+    FanVanille:  presence === 'Non' ? '0' : (document.getElementById('fanVanille').value || '0'),
+    LieuDeVente: document.getElementById('lieuVente').value,
+    Categorie:   document.getElementById('fieldCategorie').value,
+    Commentaire: document.getElementById('commentaire').value
+  };
+
+  const ref = 'FM-' + Date.now().toString(36).toUpperCase();
+
+  // const WEBAPP_URL = 'https://script.google.com/macros/s/VOTRE_ID/exec';
+  // fetch(WEBAPP_URL, { method:'POST', body: JSON.stringify(data) });
+
+  console.log('Check-in data:', data);
+
+  document.getElementById('checkinForm').style.display = 'none';
+  document.getElementById('dateBanner').style.display = 'none';
+  const suc = document.getElementById('successScreen');
+  suc.style.display = 'block';
+  document.getElementById('successName').textContent = data.NomVendor;
+  document.getElementById('successRef').textContent = '🔖 Réf : ' + ref;
+}
+</script>
+</body>
+</html>

@@ -656,8 +656,8 @@ function handleSubmit(e) {
 
   const ref = 'FM-' + Date.now().toString(36).toUpperCase();
 
-  // const WEBAPP_URL = 'https://script.google.com/macros/s/1tWio_3tnf-n42etdPucQ2BWoYDXl4H3vbPK77lck294/exec';
-  // fetch(WEBAPP_URL, { method:'POST', body: JSON.stringify(data) });
+  const WEBAPP_URL = 'https://script.google.com/macros/s/1tWio_3tnf-n42etdPucQ2BWoYDXl4H3vbPK77lck294/exec';
+  fetch(WEBAPP_URL, { method:'POST', body: JSON.stringify(data) });
 
   console.log('Check-in data:', data);
 

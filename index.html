@@ -330,6 +330,7 @@
     <input type="hidden" id="fieldPeriode" name="Periode">
     <input type="hidden" id="fieldPresence" name="Presence" value="">
     <input type="hidden" id="fieldCategorie" name="Categorie" value="">
+    <input type="hidden" id="fieldVenteDate" name="VenteDate">
 
     <!-- BLOC 1 : IDENTIFICATION -->
     <div class="card">
@@ -393,11 +394,6 @@
     <div class="card" id="blocVentes">
       <div class="card-title">Ventes du Jour</div>
       <p class="section-note">Remplir uniquement si vous avez vendu aujourd'hui.</p>
-
-      <div style="margin-bottom:12px;">
-        <label class="field-label">Vente du <span class="required">*</span></label>
-        <input type="date" id="venteDate" name="VenteDate">
-      </div>
 
       <div style="margin-bottom:12px;">
         <label class="field-label">Ventes totales (FCFA)</label>
@@ -512,10 +508,16 @@ function initDateTime() {
   const periode = h < 12 ? 'Matin' : h < 17 ? 'Après-midi' : 'Soir';
   const timeVal = `${pad(h)}:${pad(now.getMinutes())}`;
 
+  // Hier
+  const hier = new Date(now);
+  hier.setDate(hier.getDate() - 1);
+  const hierStr = `${pad(hier.getDate())}/${pad(hier.getMonth()+1)}/${hier.getFullYear()}`;
+
   document.getElementById('displayDate').textContent = date;
   document.getElementById('displayPeriode').textContent = periode;
   document.getElementById('fieldDate').value = date;
   document.getElementById('fieldPeriode').value = periode;
+  document.getElementById('fieldVenteDate').value = hierStr;
   document.getElementById('heureDebut').value = timeVal;
 }
 initDateTime();
@@ -644,7 +646,7 @@ function handleSubmit(e) {
     NomVendor:   document.getElementById('nomVendor').value,
     Depot:       document.getElementById('depot').value,
     Presence:    presence,
-    VenteDate:   presence === 'Non' ? '' : document.getElementById('venteDate').value,
+    VenteDate:   presence === 'Non' ? '' : document.getElementById('fieldVenteDate').value,
     VentesFCFA:  presence === 'Non' ? '0' : (document.getElementById('ventesFCFA').value || '0'),
     FanXtra:     presence === 'Non' ? '0' : (document.getElementById('fanXtra').value || '0'),
     FanChoco:    presence === 'Non' ? '0' : (document.getElementById('fanChoco').value || '0'),
@@ -656,6 +658,7 @@ function handleSubmit(e) {
 
   const ref = 'FM-' + Date.now().toString(36).toUpperCase();
 
+  
   const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwMHi_C37LCiN1ceXsEPTUSpDYUpdDTSYfL11-TdcYKoNNJJySjXzpMiQCjfNq45sed0A/exec';
   fetch(WEBAPP_URL, { method:'POST', body: JSON.stringify(data) });
 
